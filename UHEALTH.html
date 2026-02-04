@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistem Pakar Diagnosa Penyakit</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:Poppins, Arial, sans-serif;
+  background:linear-gradient(180deg,#e0f2fe,#f8fafc);
+  color:#0f172a;
+}
+
+.header{
+  background:linear-gradient(135deg,#2563eb,#38bdf8);
+  color:white;
+  padding:36px 20px;
+  text-align:center;
+  border-bottom-left-radius:32px;
+  border-bottom-right-radius:32px;
+}
+
+.wrapper{
+  max-width:760px;
+  margin:-24px auto 40px;
+  padding:0 16px;
+}
+
+.card{
+  background:white;
+  border-radius:20px;
+  padding:22px;
+  margin-bottom:22px;
+  box-shadow:0 20px 35px rgba(0,0,0,0.1);
+}
+
+.card h2{
+  margin-bottom:16px;
+  color:#1e3a8a;
+}
+
+/* === GEJALA === */
+.symptom{
+  margin-bottom:14px;
+}
+
+.symptom label{
+  font-weight:500;
+  display:block;
+  margin-bottom:6px;
+}
+
+.buttons{
+  display:flex;
+  gap:10px;
+}
+
+.buttons button{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#e5e7eb;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.buttons button.active{
+  background:#2563eb;
+  color:white;
+}
+
+/* === BUTTON === */
+button.main{
+  width:100%;
+  margin-top:18px;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,#2563eb,#38bdf8);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+
+button.secondary{
+  width:100%;
+  margin-top:12px;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  background:#e5e7eb;
+  cursor:pointer;
+}
+
+/* === RESULT === */
+.result{
+  margin-top: 32px;
+  background:#f0f9ff;
+  border-left:5px solid #38bdf8;
+  padding:16px;
+  border-radius:14px;
+  font-size:14px;
+  line-height:1.6;
+}
+
+/* MAP */
+#map{
+  height:260px;
+  border-radius:16px;
+  margin-top:12px;
+  position:relative;
+  z-index:1; /* map di bawah modal */
+}
+
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,0.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999; /* modal selalu di atas */
+}
+
+
+.modal-box{
+  background:white;
+  padding:22px;
+  border-radius:18px; 
+  width:90%;
+  max-width:360px;
+  text-align:center;
+}
+
+.modal-box a{
+  display:block;
+  margin-top:10px;
+  padding:12px;
+  background:#2563eb;
+  color:white;
+  border-radius:10px;
+  text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>Sistem Pakar Diagnosa Penyakit</h1>
+  <p>APLIKASI EDUKASI BERBASIS WEB</p>
+</div>
+
+<div class="wrapper">
+
+<!-- DIAGNOSA -->
+<div class="card">
+<h2>Gejala yang Dialami</h2>
+
+<div class="symptom" data-key="demam">
+  <label>Demam</label>
+  <div class="buttons">
+    <button onclick="setGejala(this,'demam','ya')">Ya</button>
+    <button onclick="setGejala(this,'demam','tidak')">Tidak</button>
+  </div>
+</div>
+
+<div class="symptom" data-key="batuk">
+  <label>Batuk</label>
+  <div class="buttons">
+    <button onclick="setGejala(this,'batuk','ya')">Ya</button>
+    <button onclick="setGejala(this,'batuk','tidak')">Tidak</button>
+  </div>
+</div>
+
+<div class="symptom" data-key="pilek">
+  <label>Pilek</label>
+  <div class="buttons">
+    <button onclick="setGejala(this,'pilek','ya')">Ya</button>
+    <button onclick="setGejala(this,'pilek','tidak')">Tidak</button>
+  </div>
+</div>
+
+<div class="symptom" data-key="nyeri">
+  <label>Nyeri Otot / Sendi</label>
+  <div class="buttons">
+    <button onclick="setGejala(this,'nyeri','ya')">Ya</button>
+    <button onclick="setGejala(this,'nyeri','tidak')">Tidak</button>
+  </div>
+</div>
+
+<div class="symptom" data-key="mual">
+  <label>Mual / Muntah</label>
+  <div class="buttons">
+    <button onclick="setGejala(this,'mual','ya')">Ya</button>
+    <button onclick="setGejala(this,'mual','tidak')">Tidak</button>
+  </div>
+</div>
+
+<div class="symptom" data-key="ruam">
+  <label>Ruam Kulit</label>
+  <div class="buttons">
+    <button onclick="setGejala(this,'ruam','ya')">Ya</button>
+    <button onclick="setGejala(this,'ruam','tidak')">Tidak</button>
+  </div>
+</div>
+
+<button class="main" onclick="diagnosa()">Mulai Diagnosa</button>
+<div id="hasil" class="result" style="display:none"></div>
+</div>
+
+<!-- MAP -->
+<div class="card">
+<h2>Rumah Sakit Terdekat</h2>
+<button class="main" onclick="cariRS()">Cari Rumah Sakit</button>
+<div id="map"></div>
+<button class="secondary" onclick="openMaps()">Buka di Google Maps</button>
+</div>
+
+<!-- DOKTER -->
+<div class="card">
+<h2>Konsultasi Dokter</h2>
+<button class="main" onclick="openModal()">Tanya Dokter Online</button>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <h3>Pilih Layanan</h3>
+    <a href="https://www.halodoc.com" target="_blank">Halodoc</a>
+    <a href="https://www.alodokter.com" target="_blank">Alodokter</a>
+    <a href="#" onclick="closeModal()">Tutup</a>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+const gejala = {
+  demam:null, batuk:null, pilek:null,
+  nyeri:null, mual:null, ruam:null
+};
+
+function setGejala(btn,key,val){
+  const parent = btn.parentElement;
+  parent.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  gejala[key]=val;
+}
+
+function diagnosa(){
+  for(let g in gejala){
+    if(gejala[g]===null){
+      alert("Lengkapi semua gejala!");
+      return;
+    }
+  }
+
+  let penyakit="Tidak terdeteksi";
+  let saran="Disarankan berkonsultasi ke dokter.";
+
+  if(gejala.demam==="ya" && gejala.batuk==="ya" && gejala.pilek==="ya"){
+    penyakit="Influenza";
+    saran="Istirahat cukup, minum air hangat, dan vitamin.";
+  }else if(gejala.demam==="ya" && gejala.ruam==="ya"){
+    penyakit="Demam Berdarah";
+    saran="Segera ke rumah sakit dan perbanyak cairan.";
+  }else if(gejala.demam==="ya" && gejala.mual==="ya"){
+    penyakit="Tifus";
+    saran="Istirahat total dan periksa ke dokter.";
+  }
+
+  const h=document.getElementById("hasil");
+  h.style.display="block";
+  h.innerHTML=`<strong>${penyakit}</strong><br>${saran}`;
+}
+
+let map;
+function cariRS(){
+  navigator.geolocation.getCurrentPosition(p=>{
+    if(!map){
+      map=L.map("map").setView([p.coords.latitude,p.coords.longitude],14);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    }
+    L.marker([p.coords.latitude,p.coords.longitude]).addTo(map)
+     .bindPopup("Lokasi Anda").openPopup();
+  });
+}
+
+function openMaps(){
+  window.open("https://www.google.com/maps/search/rumah+sakit","_blank");
+}
+function openModal(){document.getElementById("modal").style.display="flex";}
+function closeModal(){document.getElementById("modal").style.display="none";}
+</script>
+
+</body>
+</html>
