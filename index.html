@@ -2,84 +2,93 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Diagnosa Gejala Penyakit</title>
+<title>UHealth - Diagnosa Gejala Penyakit</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-:root{
-  --bg:#0f172a;
-  --card:#1e293b;
-  --text:#f1f5f9;
-  --muted:#cbd5e1;
-  --accent:#3b82f6;
-  --success:#22c55e;
-}
-
-*{box-sizing:border-box}
-
 body{
   margin:0;
-  font-family:system-ui, Arial, sans-serif;
-  background:var(--bg);
-  color:var(--text);
+  font-family:Segoe UI, Arial, sans-serif;
+  background:#f8f6f1; /* putih cream */
+  color:#1e293b;
+}
+
+
+/* JUDUL DI LUAR CARD */
+.page-header{
+  text-align:center;
+  color:#000;
+  padding:40px 20px 10px;
+}
+
+.page-header h1{
+  margin:0;
+  font-size:32px;
+  font-weight:700;
 }
 
 .container{
-  max-width:1100px;
-  margin:40px auto;
-  padding:16px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
+  max-width:700px;
+  margin:20px auto 40px;
+  display:flex;
+  flex-direction:column;
   gap:24px;
 }
 
 .card{
-  background:var(--card);
+  background:#ffffff;
   padding:28px;
-  border-radius:18px;
-  box-shadow:0 20px 40px rgba(0,0,0,.5);
+  border-radius:16px;
+  max-width:600px;
+  width:100%;
+  margin:0 auto;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
 }
 
-h1,h2{
+h2{
   text-align:center;
   margin-top:0;
 }
 
 .symptom{
-  margin-bottom:18px;
+  margin-bottom:14px;
+  text-align:center;
 }
 
 .symptom label{
   display:block;
-  margin-bottom:8px;
+  margin-bottom:6px;
   font-weight:600;
 }
 
+.buttons{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+}
+
 .buttons button{
-  padding:10px 18px;
+  padding:10px 16px;
   border:none;
-  border-radius:10px;
-  margin-right:10px;
+  border-radius:8px;
   cursor:pointer;
-  background:#334155;
-  color:white;
-  transition:.2s;
+  background:#e2e8f0;
+  min-width:90px;
 }
 
 .buttons button.active{
-  background:var(--accent);
-  transform:translateY(-2px);
+  background:#3b82f6;
+  color:white;
 }
 
 #diagnoseBtn{
-  width:100%;
-  margin-top:20px;
-  padding:16px;
+  padding:14px 28px;
+  margin:24px auto 0;
+  display:block;
   border:none;
-  border-radius:12px;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
+  border-radius:10px;
+  background:#22c55e;
   color:white;
-  font-size:1.1rem;
   font-weight:bold;
   cursor:pointer;
 }
@@ -88,35 +97,61 @@ h1,h2{
   text-align:center;
 }
 
-.confidence{
+/* CONFIDENCE BAR */
+.progress{
+  width:100%;
+  height:20px;
+  background:#e2e8f0;
+  border-radius:20px;
+  overflow:hidden;
   margin:16px 0;
-  font-size:1.5rem;
+}
+
+.progress-bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#3b82f6,#60a5fa);
+  transition:width 1s ease;
+}
+
+.confidence-text{
   font-weight:bold;
-  color:#93c5fd;
+  font-size:1.2rem;
 }
 
-.box{
-  background:#020617;
-  padding:16px;
-  border-radius:12px;
-  margin-top:16px;
-  text-align:left;
-  color:var(--muted);
+button.reset{
+  margin-top:12px;
+  padding:10px 16px;
+  border:none;
+  border-radius:8px;
+  background:#3b82f6;
+  color:white;
+  cursor:pointer;
 }
 
-@media(max-width:800px){
-  .container{grid-template-columns:1fr;}
+button.rs-btn{
+  margin-top:10px;
+  padding:12px 18px;
+  border:none;
+  border-radius:10px;
+  background:#ef4444;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
+<!-- JUDUL DI LUAR CARD -->
+<div class="page-header">
+  <h1>UHealth - Diagnosa Gejala</h1>
+</div>
+
 <div class="container">
 
-<!-- INPUT -->
 <div class="card">
-<h1>Diagnosa Gejala</h1>
 
 <div class="symptom" data-key="demam">
 <label>Demam</label>
@@ -169,42 +204,32 @@ h1,h2{
 <button id="diagnoseBtn">Mulai Diagnosa</button>
 </div>
 
-<!-- OUTPUT -->
 <div class="card result" id="result">
 <h2>Hasil Diagnosa</h2>
-<p class="muted">Pilih gejala lalu klik Mulai Diagnosa.</p>
+<p>Silakan pilih gejala terlebih dahulu.</p>
 </div>
 
 </div>
 
 <script>
-const symptoms={
+const symptoms = {
   demam:null, batuk:null, pilek:null,
   nyeri:null, mual:null, ruam:null
 };
 
 document.querySelectorAll(".symptom").forEach(box=>{
-  const key=box.dataset.key;
-  const buttons=box.querySelectorAll("button");
+  const key = box.dataset.key;
+  const buttons = box.querySelectorAll("button");
   buttons.forEach(btn=>{
-    btn.onclick=()=>{
+    btn.onclick = ()=>{
       buttons.forEach(b=>b.classList.remove("active"));
       btn.classList.add("active");
-      symptoms[key]=btn.dataset.val;
+      symptoms[key] = btn.dataset.val;
     };
   });
 });
 
-const penyakit=[
-  {nama:"Influenza", gejala:["batuk","pilek","demam"], saran:"Istirahat, minum air hangat, dan vitamin."},
-  {nama:"ISPA", gejala:["batuk","pilek"], saran:"Hindari debu dan asap rokok."},
-  {nama:"Demam Berdarah", gejala:["demam","nyeri","ruam"], saran:"Segera ke rumah sakit dan banyak minum."},
-  {nama:"Tifus", gejala:["demam","nyeri","mual"], saran:"Istirahat total dan makan lunak."},
-  {nama:"Maag", gejala:["mual","nyeri"], saran:"Hindari makanan pedas dan telat makan."},
-  {nama:"Alergi Kulit", gejala:["ruam"], saran:"Hindari pemicu alergi."}
-];
-
-document.getElementById("diagnoseBtn").onclick=()=>{
+document.getElementById("diagnoseBtn").onclick = ()=>{
   for(let k in symptoms){
     if(symptoms[k]===null){
       alert("Lengkapi semua gejala!");
@@ -212,31 +237,112 @@ document.getElementById("diagnoseBtn").onclick=()=>{
     }
   }
 
-  let best={nama:"Tidak terdeteksi", confidence:0, saran:"Konsultasi dokter disarankan."};
+  const penyakit = [
+    { nama:"Influenza", gejala:["demam","batuk","pilek"] },
+    { nama:"Demam Berdarah (DBD)", gejala:["demam","nyeri","ruam"] },
+    { nama:"Tifus", gejala:["demam","nyeri","mual"] }
+  ];
+
+  let hasil = { nama:"Tidak terdeteksi", confidence:0 };
 
   penyakit.forEach(p=>{
-    let cocok=0;
-    p.gejala.forEach(g=>{ if(symptoms[g]==="ya") cocok++; });
-    let conf=Math.round((cocok/p.gejala.length)*100);
-    if(conf>best.confidence){
-      best={nama:p.nama, confidence:conf, saran:p.saran};
+    let cocok = 0;
+    p.gejala.forEach(g=>{
+      if(symptoms[g]==="ya") cocok++;
+    });
+    let conf = Math.round((cocok/p.gejala.length)*100);
+    if(conf > hasil.confidence){
+      hasil = { nama:p.nama, confidence:conf };
     }
   });
 
-  if(best.confidence<40){
-    best={nama:"Tidak terdeteksi kuat", confidence:best.confidence, saran:"Gejala belum cukup spesifik."};
+  document.getElementById("result").innerHTML = `
+    <h2>${hasil.nama}</h2>
+    <div class="progress">
+      <div class="progress-bar" id="bar"></div>
+    </div>
+    <div class="confidence-text">${hasil.confidence}% Confidence</div>
+    <p>Semoga lekas sembuh 😊</p>
+<hr style="margin:20px 0">
+
+<h3>Tanya Dokter Online</h3>
+
+<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+  <a href="https://www.halodoc.com" target="_blank">
+    <button style="
+      padding:12px 18px;
+      border:none;
+      border-radius:10px;
+      background:#10b981;
+      color:white;
+      font-weight:bold;
+      cursor:pointer;
+    ">
+      💬 Tanya di Halodoc
+    </button>
+  </a>
+
+  <a href="https://www.alodokter.com" target="_blank">
+    <button style="
+      padding:12px 18px;
+      border:none;
+      border-radius:10px;
+      background:#2563eb;
+      color:white;
+      font-weight:bold;
+      cursor:pointer;
+    ">
+      🩺 Tanya di Alodokter
+    </button>
+  </a>
+</div>
+
+    <hr style="margin:20px 0">
+    <h3>Butuh Penanganan Lebih Lanjut?</h3>
+    <button class="rs-btn" onclick="cariRS()">🏥 Cari RS Sekarang</button>
+    <div id="mapPreview" style="margin-top:16px"></div>
+    <a target="_blank"
+       href="https://www.google.com/maps/search/rumah+sakit"
+       style="display:block;margin-top:12px;color:#3b82f6;">
+       Buka di Google Maps
+    </a>
+    <button class="reset" onclick="location.reload()">Ulangi</button>
+  `;
+
+  document.getElementById("result").scrollIntoView({behavior:"smooth"});
+
+  setTimeout(()=>{
+    document.getElementById("bar").style.width =
+      hasil.confidence + "%";
+  },100);
+
+  if(hasil.confidence >= 70){
+    setTimeout(cariRS,600);
+  }
+};
+
+function cariRS(){
+  if(!navigator.geolocation){
+    alert("Browser tidak mendukung lokasi");
+    return;
   }
 
-  document.getElementById("result").innerHTML=`
-    <h2>${best.nama}</h2>
-    <div class="confidence">${best.confidence}% Confidence</div>
-    <div class="box"><strong>Saran:</strong><br>${best.saran}</div>
-    <div class="box">Semoga lekas sembuh ❤️</div>
-    <button onclick="location.reload()" style="margin-top:20px;padding:12px 24px;border:none;border-radius:10px;background:#ef4444;color:white;cursor:pointer;">
-      Ulangi
-    </button>
-  `;
-};
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+
+    document.getElementById("mapPreview").innerHTML = `
+      <iframe
+        width="100%"
+        height="300"
+        style="border:0;border-radius:12px"
+        loading="lazy"
+        allowfullscreen
+        src="https://www.google.com/maps?q=rumah+sakit+dekat+${lat},${lon}&output=embed">
+      </iframe>
+    `;
+  });
+}
 </script>
 
 </body>
