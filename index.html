@@ -139,6 +139,69 @@ button.rs-btn{
   font-weight:bold;
   cursor:pointer;
 }
+
+/* =========================
+   MOBILE OPTIMIZATION
+========================= */
+@media (max-width:600px){
+
+  .page-header{
+    padding:28px 16px 6px;
+  }
+
+  .page-header h1{
+    font-size:24px;
+  }
+
+  .container{
+    margin:10px auto 30px;
+    padding:0 12px; /* biar tidak nempel pinggir */
+    gap:16px;
+  }
+
+  .card{
+    padding:18px;
+    border-radius:14px;
+  }
+
+  .symptom{
+    margin-bottom:18px;
+  }
+
+  .symptom label{
+    font-size:14px;
+  }
+
+  .buttons{
+    flex-direction:row;
+    gap:8px;
+  }
+
+  .buttons button{
+    flex:1; /* tombol sama lebar */
+    min-width:unset;
+    padding:10px;
+  }
+
+  #diagnoseBtn{
+    width:100%;
+    margin-top:20px;
+  }
+
+  button.rs-btn,
+  button.reset{
+    width:100%;
+  }
+
+  iframe{
+    height:250px;
+  }
+
+  .confidence-text{
+    font-size:1rem;
+  }
+}
+
 </style>
 </head>
 
